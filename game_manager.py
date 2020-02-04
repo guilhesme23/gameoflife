@@ -19,13 +19,26 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 class GameManager():
-    def __init__(self, width=400, height=180, res=10):
+    def __init__(
+            self,
+            width=400,
+            height=180,
+            res=10,
+            from_file=None,
+            save_initial_state=None
+        ):
         self.width = width
         self.height = height
         self.res = res
         self.size = (int(self.height / self.res), int(self.width / self.res))
 
-        self.cells, self.neighbours = self._build_initial_state()
+        if from_file:
+            self.read_state_from_file(from_file)
+        else:
+            self.cells, self.neighbours = self._build_initial_state()
+
+        if save_initial_state:
+            self.write_state_to_file(save_initial_state)
 
     def _build_initial_state(self):
         rows, cols = self.size
@@ -85,11 +98,17 @@ class GameManager():
         self.cells = new_generation
         self.neighbours = new_neighbours
 
-    def read_state_from_file(filename):
+    def read_state_from_file(self, filename):
         with open(filename, 'rb') as f:
-            self.rows, self.cols, self.res = f.readline().decode('utf-8').strip('\n').split(' ')[1:]
+            rows, cols, res = [int(i) for i in f.readline().decode('utf-8').strip('\n').split(' ')[1:]]
+            self.width = cols * res
+            self.height = rows * res
+            self.res = res
+            self.size = (rows, cols)
             self.cells = np.loadtxt(f, dtype=np.int)
+            self.neighbours = self._get_neighbours(self.cells)
 
-    def write_state_to_file(filename):
+    def write_state_to_file(self, filename):
+        print(filename)
         with open(filename, 'w') as f:
-            np.savetxt(f,cells, header=f'{self.size[0]} {self.size[1]} {self.res}', fmt='%d')
+            np.savetxt(f,self.cells, header=f'{self.size[0]} {self.size[1]} {self.res}', fmt='%d')
