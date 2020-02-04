@@ -2,8 +2,8 @@ import os
 from time import sleep
 import numpy as np
 
-WIDTH = 300
-HEIGHT = 150
+WIDTH = 400
+HEIGHT = 180
 RES = 10
 
 SIZE = (int(HEIGHT / RES), int(WIDTH / RES))
@@ -25,9 +25,10 @@ def draw_generation(array):
     for cells in array:
         for cell in cells:
             if cell:
+                # █
                 print(f'{bcolors.FAIL}█{bcolors.ENDC}', end=' ')
             else:
-                print(f'{bcolors.OKBLUE}█{bcolors.ENDC}', end=' ')
+                print(f'{bcolors.OKBLUE}_{bcolors.ENDC}', end=' ')
         print('')
         print('')
 
@@ -71,12 +72,25 @@ def calc_new_generation(cells, neighbours):
     new_neighbours = get_neighbours(new_generation, *new_generation.shape)
     return new_generation, new_neighbours
 
+def read_state_from_file(filename):
+    with open(filename, 'rb') as f:
+        rows, cols, res = f.readline().decode('utf-8').strip('\n').split(' ')[1:]
+        cells = np.loadtxt(f, dtype=np.int)
+    
+    return cells, rows, cols, res
+
+def write_state_to_file(filename):
+    with open(filename, 'w') as f:
+        np.savetxt(f,cells, header=f'{SIZE[0]} {SIZE[1]} {RES}', fmt='%d')
+
 if __name__ == '__main__':
     cells, n = build_initial_state(*SIZE)
+    write_state_to_file('initial_state.txt')
     try:
         while True:
             draw_generation(cells)
             cells, n = calc_new_generation(cells, n)
             sleep(0.3)
     except KeyboardInterrupt:
-        pass
+        write_state_to_file('final_state.txt')
+        print('\nGood Bye!')
