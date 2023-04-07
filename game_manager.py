@@ -75,7 +75,7 @@ class GameManager():
 
     def update(self):
         rows, cols = self.size
-        new_generation = np.zeros(self.cells.shape, dtype=np.int)
+        new_generation = np.zeros(self.cells.shape, dtype=np.int_)
         for row in range(rows):
             for col in range(cols):
                 loc = (row, col)
